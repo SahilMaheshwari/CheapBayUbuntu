@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./django_learning
+    command: gunicorn django_learning.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/django-on-docker/django_learning/web/staticfiles
+      - media_volume:/django-on-docker/django_learning/web/mediafiles
+    expose:
+      - 8000
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: dbtest
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: sahil1234
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+    volumes:
+      - ./certbot/www:/var/www/backend/sahil/django-on-docker/certbot
+      - ./certbot/conf:/etc/letsencrypt
+      - static_volume:/django-on-docker/django_learning/web/staticfiles
+      - media_volume:/django-on-docker/django_learning/web/mediafiles
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/www:/var/www/backend/sahil/django-on-docker/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    command: certonly --webroot -w /var/www/backend/sahil/django-on-docker/certbot --force-renewal --email sahil7503@gmail.com -d sahil.detrace.systems --agree-tos
+
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+

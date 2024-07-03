@@ -1,0 +1,56 @@
+{% extends "blog/base.html" %}
+{% block content %}
+  <article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <a class="mr-2" href="{% url 'seller' object.author %}">{{ object.author }}</a>
+        <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
+        {% if object.author == user %}
+          <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="post_update">Update</a>
+            <!-- <a class="btn btn-danger btn-sm mt-1 mb-1" href="#">Delete</a> -->
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="article-title">{{ object.title }}</h2>
+      <p class="article-content">$ {{ object.price }}</p>
+      <img src="{{ object.image.url }}" style="max-height:300px">
+      <p class="article-content">{{ object.description }}</p>
+      <!-- {% if object.author.profile.is_seller %} -->
+      <h3 class="article-title">Add to cart</h3>  
+      <form method="post" action="{% url 'add_to_cart' post.id 'detail_view'%}">
+        {% csrf_token %}
+        <label for="quantity">Quantity:</label>
+        <select name="quantity" id="quantity">
+            {% for qty in '123456789'|make_list %}
+                <option value="{{ qty }}">{{ qty }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Add to cart</button>
+    </form>
+    <a href="{% url 'add_to_wishlist' post.id %}" class="heart-icon"><i class="fa fa-heart"></i></a>
+    <!-- {% endif %} -->
+  </article>
+
+  <h2>Reviews</h2>
+  {% if not object.review.all %}
+    No Reviews yet...
+  {% else %}
+    {% for review in object.review.all %}
+    <article class="media content-section">
+      <img class="rounded-circle article-img" src="{{ review.author.profile.image.url }}">
+      <div class="media-body">
+        <div class="article-metadata">
+          <a class="mr-2" href="#">{{ review.author }}</a>
+          <small class="text-muted">{{ review.date|date:"F d, Y" }}</small>
+        </div>
+        <h2 class="article-title">{{ review.title }}</h2>
+        <p class="article-content">{{ review.content }}</p>
+        <p class="article-content">rating {{ review.rating }}/10</p>
+      </div>
+    </article>
+    {% endfor %}
+  {% endif %}
+
+{% endblock content %}
